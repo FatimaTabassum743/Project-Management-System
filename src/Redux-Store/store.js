@@ -11,7 +11,7 @@ import ProductsSlice from "./Products/ProductsSlice";
 import RawMaterialsSlice from "./Inventory/RawMaterials/RawMaterialsSlice";
 import PurchaseOrderSlice from "./Inventory/PurchaseOrders/PurchaseOrderSlice";
 import VendorProfilesSlice from "Redux-Store/Inventory/VendorProfile/VendorProfileSlice";
-import AddProject from "Views/Postlogin/Projects/ProjectCompo/Addproject";
+import AddProject from "Views/Postlogin/Projects/Addproject";
 const store = configureStore({
   reducer: {
     // savedQuotations: QuotationsReducer,

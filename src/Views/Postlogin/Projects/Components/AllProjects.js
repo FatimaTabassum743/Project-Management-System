@@ -3,7 +3,6 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
-
   Container,
   Header,
   Cards,
@@ -15,15 +14,20 @@ import {
   Grid,
   ButtonDropdown,
 } from '@cloudscape-design/components';
-import member from "../../../../assets/img/profile-img.jpg"
 
-const AllProjects = ({ onCreateProject }) => {
+const AllProjects = ({ specificProjectDetails }) => {
+  const navigate = useNavigate();
+
+  const onCreateProject = () => {
+    navigate("/app/project/create-project");
+  };
+
   // State to manage the current page index for pagination
   const [currentPageIndex, setCurrentPageIndex] = useState(1);
-  
+
   // State to manage the text used for filtering projects
   const [filteringText, setFilteringText] = useState('');
-  
+
   // State to toggle between card and table views
   const [view, setView] = useState('cards');
 
@@ -36,11 +40,12 @@ const AllProjects = ({ onCreateProject }) => {
     item.ProjectDescription.toLowerCase().includes(filteringText.toLowerCase()) ||
     item.ProjectName.toLowerCase().includes(filteringText.toLowerCase())
   );
+
   // Constants for pagination
   const itemsPerPage = 6;
   const startIndex = (currentPageIndex - 1) * itemsPerPage;
   const paginatedItems = filteredItems.slice(startIndex, startIndex + itemsPerPage);
-  
+
   // State to manage the selected items in the table
   const [selectedItems, setSelectedItems] = useState([]);
 
@@ -145,7 +150,7 @@ const AllProjects = ({ onCreateProject }) => {
                   >
                     {paginatedItems.map(item => (
                       <Cards
-                        // key={item.id}
+                        key={item.id}
                         ariaLabels={{
                           itemSelectionLabel: (e, i) => `select ${i.ProjectName}`,
                           selectionGroupLabel: "Item selection"
@@ -155,7 +160,8 @@ const AllProjects = ({ onCreateProject }) => {
                             {
                               id: "details",
                               content: item => (
-                                <div style={{ color: item.status === 'Active' ? 'inherit' : '#414D5C', padding: "5px" }}>
+                                <div  onClick={specificProjectDetails} 
+                                style={{ color: item.status === 'Active' ? 'inherit' : '#414D5C', padding: "5px" }}>
                                   <div style={{ display: "flex", justifyContent: "space-between", textAlign: "center" }}>
                                     <div style={{ display: "flex", gap: "2px", justifyItems: "center", textAlign: "center" }}>
                                       <div style={{
@@ -179,11 +185,42 @@ const AllProjects = ({ onCreateProject }) => {
                                     </Button>
                                   </div>
                                   <p>{item.ProjectDescription}</p>
-                                  <div style={{ display: 'flex', justifyContent: "space-between" }}>
-                                    {/* <p style={{ fontSize: '12px' }}>Duration: {item.durationInMonths || "-"} Months</p> */}
-                                    <img src={member} alt='images of team members' height={20} width={20} style={
-                                      {marginTop:"5px"}
-                                    }></img>
+                                  <div style={{ display: 'flex', justifyContent: "space-between", marginTop:"10px" }}>
+                                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                                      {item.membersRequired.slice(0, 4).map((member, index) => (
+                                        <img
+                                          key={index}
+                                          src={member.imageUrl}
+                                          alt={`Member ${index}`}
+                                          style={{
+                                            width: '20px',
+                                            height: '20px',
+                                            borderRadius: '50%',
+                                            marginLeft: index ? '-10px' : '0',
+                                            zIndex: 4 - index,
+                                          }}
+                                        />
+                                      ))}
+                                      {item.membersRequired.length > 4 && (
+                                        <div
+                                          style={{
+                                            width: '20px',
+                                            height: '20px',
+                                            borderRadius: '50%',
+                                            backgroundColor: '#ccc',
+                                            display: 'flex',
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            marginLeft: '-10px',
+                                            zIndex: 0,
+                                            fontSize: '12px',
+                                            color: '#fff',
+                                          }}
+                                        >
+                                          +{item.membersRequired.length - 4}
+                                        </div>
+                                      )}
+                                    </div>
                                     <Button href="#" variant="inline-link">
                                       Use Cases: 10
                                     </Button>
@@ -221,80 +258,68 @@ const AllProjects = ({ onCreateProject }) => {
                       selectionGroupLabel: "Items selection",
                       allItemsSelectionLabel: ({ selectedItems }) =>
                         `${selectedItems.length} ${selectedItems.length === 1 ? "item" : "items"} selected`,
-                      itemSelectionLabel: ({ selectedItems }, item) => item.ProjectName
+                      itemSelectionLabel: ({ selectedItems }, item) => {
+                        const isItemSelected = selectedItems.filter(
+                          i => i.name === item.name
+                        ).length;
+                        return `${item.name} is ${
+                          isItemSelected ? "" : "not"
+                        } selected`;
+                      }
                     }}
                     columnDefinitions={[
                       {
-                        id: "id",
+                        id: "projectName",
                         header: "Project Name",
-                        cell: item => item.id || "-",
-                        sortingField: "id",
-                        isRowHeader: true
+                        cell: e => e.id,
+                        sortingField: "projectName"
                       },
                       {
-                        id: "ProjectDescription",
-                        header: "Project Description",
-                        cell: item => item.ProjectDescription || "-",
-                        sortingField: "name"
+                        id: "description",
+                        header: "Description",
+                        cell: e => e.ProjectDescription,
+                        sortingField: "description"
                       },
                       {
-                        id: "Pm",
-                        header: "Project Manager",
-                        cell: item => item.contactNumber || "-"
+                        id: "status",
+                        header: "Status",
+                        cell: e => e.status,
+                        sortingField: "status"
                       },
                       {
-                        id: "UI",
-                        header: "UI Team",
-                        cell: item => item.address || "-"
-                      },
-                      {
-                        id: "Team",
-                        header: "Team",
-                        cell: item => item.email || "-"
-                      },
+                        id: "teamSize",
+                        header: "Team Size",
+                        cell: e => e.membersRequired.length,
+                        sortingField: "teamSize"
+                      }
                     ]}
-                    enableKeyboardNavigation
                     items={paginatedItems}
-                    loadingText="Loading resources"
-                    selectionType="multi"
-                    sortingDisabled
-                    wrapLines
-                    variant="full-page"
-                    stickyHeader
-                    empty={
-                      <Box margin={{ vertical: "xs" }} textAlign="center" color="inherit">
-                        <Box margin={{ bottom: "m" }}>
-                          <b>No resources</b>
-                        </Box>
-                      </Box>
+                    pagination={
+                      <Pagination
+                        currentPageIndex={currentPageIndex}
+                        pagesCount={Math.ceil(filteredItems.length / itemsPerPage)}
+                        onChange={({ detail }) =>
+                          setCurrentPageIndex(detail.currentPageIndex)
+                        }
+                      />
+                    }
+                    filter={
+                      <TextFilter
+                        filteringPlaceholder="Find resources"
+                        filteringText={filteringText}
+                        onChange={e => setFilteringText(e.detail.filteringText)}
+                      />
                     }
                     header={
                       <Header
-                        counter={`(${AddProject.length})`}
-                        actions={
-                          <SpaceBetween size="xs" direction="horizontal">
-                            <Button href="#" iconName="settings" />
-                          </SpaceBetween>
-                        }
+                        counter={`(${filteredItems.length})`}
                       >
-                        All Projects
+                        Projects
                       </Header>
                     }
                   />
                 )}
               </Box>
-
-              {/* Pagination component to handle page changes */}
-              <Pagination
-                currentPageIndex={currentPageIndex}
-                onChange={({ detail }) => setCurrentPageIndex(detail.currentPageIndex)}
-                pagesCount={Math.ceil(filteredItems.length / itemsPerPage)}
-                ariaLabels={{
-                  nextPageLabel: "Next page",
-                  previousPageLabel: "Previous page",
-                  pageLabel: pageNumber => `Page ${pageNumber} of all pages`
-                }}
-              />
             </SpaceBetween>
           </Box>
         </SpaceBetween>

@@ -6,7 +6,7 @@ import PurchasedOrder from "./Postlogin/FinishProductSpecification/PurchasedOrde
 import QuotationCreateFPS from "./Postlogin/Quatations/QuotationCreateFPS";
 import ProductDetails from "./Postlogin/FinishProductSpecification/ProductDetails";
 import QuatationsForm from "./Postlogin/Quatations/QutationForm";
-import Addproject from "./Postlogin/Projects/ProjectCompo/Addproject";
+import Addproject from "./Postlogin/Projects/Addproject";
 const Dashboards = lazy(() => import("./Postlogin/Dashboard"));
 const Quotations = lazy(() => import("./Postlogin/Quatations"));
 const FinishProductSpecification = lazy(() =>

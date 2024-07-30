@@ -1,38 +1,47 @@
 import { Box, BreadcrumbGroup, Button, ContentLayout, Header, SpaceBetween } from '@cloudscape-design/components';
 import React, { useState } from 'react';
-import AllProjects from './ProjectCompo/AllProjects';
-import AddProject from './ProjectCompo/Addproject';
+import AllProjects from './Components/AllProjects';
+import AddProject from './Addproject/index';
 import { useNavigate, useLocation } from 'react-router-dom';
+import ProjectDetails from './ProjectDetails';
 
 const Projects = () => {
   const navigate = useNavigate();
   const [view, setView] = useState('allProjects');
   const [breadcrumbs, setBreadcrumbs] = useState([
-    { text: "Dashboard", href: "/app/dashboard" },
-    { text: "Projects", href: "/app/projects" },
+    { text: "Dashboard" },
+    { text: "Projects" },
   ]);
   const [heading, setHeading] = useState("Projects");
 
   const handleButtonClick = () => {
     setBreadcrumbs([
-      { text: "Dashboard", href: "/app/dashboard" },
-      { text: "Projects", href: "/app/projects" },
-      { text: "Create Project", href: "/app/project/create-project" }
+      { text: "Dashboard" },
+      { text: "Projects", },
+      { text: "Procurement",  }
     ]);
-    setHeading("Create Project");
-    setView('createProject');
-    navigate("/app/project/create-project");
+    setHeading("Procurement");
+    setView('ProjectName');
+  
   };
 
   const handleBreadcrumbClick = (breadcrumb) => {
     if (breadcrumb.text === "Projects") {
       setBreadcrumbs([
-        { text: "Dashboard", href: "/app/dashboard" },
-        { text: "Projects", href: "/app/projects" },
+        { text: "Dashboard" },
+        { text: "Projects" },
       ]);
       setHeading("Projects");
       setView('allProjects');
       navigate("/app/projects");
+    }
+    else if(breadcrumb.text === "Dashboard"){
+      setBreadcrumbs([
+        { text: "Dashboard" },
+        { text: "Projects" },
+      ]);
+     
+      navigate("/app/dashboard");
     }
   };
 
@@ -54,10 +63,10 @@ const Projects = () => {
       }
     >
       {view === 'allProjects' && (
-        <AllProjects onCreateProject={handleButtonClick} />
+        <AllProjects specificProjectDetails={handleButtonClick} />
       )}
-      {view === 'createProject' && (
-        <AddProject />
+      {view === 'ProjectName' && (
+        <ProjectDetails /> // we have to give param and routing here i will do it later
       )}
     </ContentLayout>
   );

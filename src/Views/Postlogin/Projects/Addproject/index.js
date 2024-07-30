@@ -21,12 +21,43 @@ import {
 } from '@cloudscape-design/components';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { addProject } from '../../../../../Redux-Store/AddProjects/AddProject';
-import ResourcePool from './ResourcePool';
-import edit from "../../../../../assets/img/Group 1000004386.png";
-import "../../../../../assets/styles/addproject.css"
+import { addProject } from '../../../../Redux-Store/AddProjects/AddProject';
+import ResourcePool from './Components/ResourcePool';
+import edit from "../../../../assets/img/Group 1000004386.png";
+import "../../../../assets/styles/addproject.css"
 
 const AddProject = () => {
+  const [membersRequired, setMembersRequired] = useState([]);
+
+  const handleMembersRequiredUpdate = (members) => {
+    setMembersRequired(members);
+    // You can perform other actions with the updated members array here
+    console.log('Updated Members Required:', members);
+  };
+  const [breadcrumbs, setBreadcrumbs] = useState([
+    { text: "Dashboard" },
+    { text: "Projects" },
+    { text: "Create-Project" },
+  ]);
+
+  const handleBreadcrumbClick = (breadcrumb) => {
+    if (breadcrumb.text === "Projects") {
+      setBreadcrumbs([
+        { text: "Dashboard" },
+        { text: "Projects" },
+      ]);
+     
+      navigate("/app/projects");
+    }
+    else if(breadcrumb.text === "Dashboard"){
+      setBreadcrumbs([
+        { text: "Dashboard" },
+        { text: "Projects" },
+      ]);
+     
+      navigate("/app/dashboard");
+    }
+  };
 
 
   const [activeStepIndex, setActiveStepIndex] = useState(0);
@@ -64,11 +95,10 @@ const AddProject = () => {
     const newProject = {
       id: ProjectName,
       ProjectDescription,
-     
       startDate,
       endDate,
-    
       durationInMonths, // Include the calculated duration
+      membersRequired // Add the membersRequired array
     };
     dispatch(addProject(newProject));
  
@@ -79,10 +109,7 @@ const AddProject = () => {
     navigate('/app/projects');
   };
 
-  const handleSelectTeamCallback = (team, items) => {
-    setSelectedTeam(team);
-    setSelectedItems(items);
-  };
+ 
   const calculateDurationInMonths = (start, end) => {
     const startDate = new Date(start);
     const endDate = new Date(end);
@@ -165,7 +192,7 @@ const AddProject = () => {
       title: 'Resource Pool',
       content: (
         <Box>
-          <ResourcePool onSelectTeam={handleSelectTeamCallback} />
+           <ResourcePool onMembersRequiredUpdate={handleMembersRequiredUpdate} />
           <Box textAlign="center" margin={{top:"xl",left:"s"}}>
          
             {activeStepIndex >= 1 && (
@@ -233,26 +260,48 @@ const AddProject = () => {
             </Box>
           </Container>
           <Header variant="h3">Teams and Users (20)</Header>
+        
           <Tabs
            
             onChange={({ detail }) => setActiveTabId(detail.activeTabId)}
             activeTabId={activeTabId}
             tabs={[
               {
-                label: "UX Team",
+                label: "UI Team Members",
                 id: "first",
                 content:<Table
                 columnDefinitions={[
-                  { header: 'Name', cellRenderer: item => item.name },
-                  { header: 'Description', cellRenderer: item => item.description }
+                  {
+                    header: 'Name',
+                    cell: item => (
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <img
+                          src={item.imageUrl}
+                          alt={item.name}
+                          style={{
+                            width: 40, // Adjust size as needed
+                            height: 40, // Adjust size as needed
+                            borderRadius: '50%', // For circular images
+                            marginRight: 8 // Space between image and text
+                          }}
+                        />
+                        {item.name}
+                      </div>
+                    )
+                  },
+                  {
+                    header: 'Description',
+                    cell: item => item.description // Use 'cell' instead of 'cellRenderer'
+                  }
                 ]}
-                items={selectedItems}
+                items={membersRequired}
                 empty={
                   <Box margin={{ vertical: 'xs' }} textAlign="center" color="inherit">
                     <b>No resources selected</b>
                   </Box>
                 }
               />
+              
               },
               {
                 label: "UI Team",
@@ -299,14 +348,11 @@ const AddProject = () => {
     breadcrumbs={
       
       <BreadcrumbGroup
-      items={[
-        { text: "Dashboard", href: "/app/dashboard" },
-        { text: "Project", href: "/app/projects" },
-        {
-          text: "Create Project",
-          href: "#components/breadcrumb-group"
-        }
-      ]}
+      items={breadcrumbs}
+       
+          onClick={({ detail }) => handleBreadcrumbClick(detail.item)}
+        
+      
       ariaLabel="Breadcrumbs"
     />
 
