@@ -24,7 +24,7 @@ import { useDispatch } from 'react-redux';
 import { addProject } from '../../../../Redux-Store/AddProjects/AddProject';
 import ResourcePool from './Components/ResourcePool';
 import edit from "../../../../assets/img/Group 1000004386.png";
-import "../../../../assets/styles/addproject.css"
+import "../../../../assets/styles/cloudScapeCustom.css"
 
 const AddProject = () => {
   const [membersRequired, setMembersRequired] = useState([]);
@@ -37,7 +37,7 @@ const AddProject = () => {
   const [breadcrumbs, setBreadcrumbs] = useState([
     { text: "Dashboard" },
     { text: "Projects" },
-    { text: "Create-Project" },
+    { text: "Create Project" },
   ]);
 
   const handleBreadcrumbClick = (breadcrumb) => {
@@ -58,12 +58,17 @@ const AddProject = () => {
       navigate("/app/dashboard");
     }
   };
+  console.log(membersRequired,"array");
+
+
+  const calculateTotalMembers = () => {
+    return membersRequired.reduce((total, team) => total + team.members.length, 0);
+  };
 
 
   const [activeStepIndex, setActiveStepIndex] = useState(0);
-  const [activeTabId, setActiveTabId] = useState(1);
-  const [selectedTeam, setSelectedTeam] = useState(null);
-  const [selectedItems, setSelectedItems] = useState([]);
+  const [activeTabId, setActiveTabId] = useState("tab-0");
+
   const [ProjectName, setProjectName] = useState('');
   const [ProjectDescription, setProjectDescription] = useState('');
 
@@ -128,34 +133,31 @@ const AddProject = () => {
        
         }}
         header={
-          <Header variant="h3" style={{fontWeight:"15px"}}>Step Up Project</Header>
+          <Header variant="h3">Step Up Project</Header>
         }>
          
           <FormField label="Project Name">
-          <div style={{width:"50vw"}}>
-            <Input value={ProjectName} onChange={handleChange(setProjectName)} />
+          <div style={{width:"57vw"}}>
+            <Input placeholder="Project Name" value={ProjectName} onChange={handleChange(setProjectName)} />
             </div>
           </FormField>
           <FormField label="Description">
-          <div style={{width:"50vw"}}>
-            <Textarea  value={ProjectDescription} onChange={handleChange(setProjectDescription)} />
+          <div style={{width:"57vw"}}>
+            <Textarea  placeholder="Description" value={ProjectDescription} onChange={handleChange(setProjectDescription)} />
             </div>
           </FormField>
-          <ColumnLayout columns={2}
-    >
-
+          <div style={{display:"flex",gap:"10px"}}>
+          
           <FormField label="Start Date">
-          <DateInput value={startDate} onChange={handleChange(setstartDate)} />
+          <div style={{width:"27vw"}}>
+          <DateInput placeholder="Start Date" value={startDate} onChange={handleChange(setstartDate)} />
+          </div>
           </FormField>
-          {/* <FormField label="End Date">
-            <DateInput value={endDate} onChange={handleChange(setendDate)} />
-          </FormField> */}
+       
           
           <FormField
-      label="End Date"
-     
-    >
-    
+      label="End Date" >
+      <div style={{width:"29vw"}}>
       <DatePicker
         onChange={handleChange(setendDate)}
         value={endDate}
@@ -167,9 +169,12 @@ const AddProject = () => {
         }
         placeholder="End Date"
       />
+      </div>
+     
     
     </FormField>
-    </ColumnLayout>
+    
+    </div>
    
         </Container>
          <Box textAlign="center"  margin={{top:"xl",left:"s"}}>
@@ -214,7 +219,7 @@ const AddProject = () => {
       
       content: (
         <SpaceBetween direction="vertical" size="s">
-          <Container>
+          <Container className="Review-Container">
             
             <Header variant="h3">Review</Header>
             <Grid
@@ -232,6 +237,7 @@ const AddProject = () => {
                   onClick={() => setActiveStepIndex(0)}
                 />
               </Box>
+              <div>
               <ColumnLayout columns={3} variant="text-grid">
                 <div>
                   <strong>Project Name</strong>
@@ -251,25 +257,28 @@ const AddProject = () => {
   } months)
 </p>
 
+
           </div>
               </ColumnLayout>
-            </Grid>
-            <Box variant="p">
+              <Box>
               <strong>Project Description</strong>
               <p>{ProjectDescription}</p>
             </Box>
-          </Container>
-          <Header variant="h3">Teams and Users (20)</Header>
-        
-          <Tabs
+              </div>
+            </Grid>
            
-            onChange={({ detail }) => setActiveTabId(detail.activeTabId)}
-            activeTabId={activeTabId}
-            tabs={[
-              {
-                label: "UI Team Members",
-                id: "first",
-                content:<Table
+          </Container>
+          <Header variant="h3">Teams and Users ({calculateTotalMembers()})</Header>        
+          <Tabs
+          onChange={({ detail }) => setActiveTabId(detail.activeTabId)}
+          activeTabId={activeTabId}
+          tabs={membersRequired.map((team, index) => ({
+            label: team.teamName,
+            id: `tab-${index}`,
+            content: (
+              <Table
+               className="Members-table"
+                header={<Header>{team.teamName}</Header>}
                 columnDefinitions={[
                   {
                     header: 'Name',
@@ -279,72 +288,54 @@ const AddProject = () => {
                           src={item.imageUrl}
                           alt={item.name}
                           style={{
-                            width: 40, // Adjust size as needed
-                            height: 40, // Adjust size as needed
-                            borderRadius: '50%', // For circular images
-                            marginRight: 8 // Space between image and text
+                            width: 40,
+                            height: 40,
+                            borderRadius: '50%',
+                            marginRight: 8
                           }}
                         />
                         {item.name}
                       </div>
-                    )
+                    ),
                   },
                   {
                     header: 'Description',
-                    cell: item => item.description // Use 'cell' instead of 'cellRenderer'
+                    cell: item => item.description
                   }
                 ]}
-                items={membersRequired}
+                items={team.members}
                 empty={
                   <Box margin={{ vertical: 'xs' }} textAlign="center" color="inherit">
                     <b>No resources selected</b>
                   </Box>
                 }
               />
-              
-              },
-              {
-                label: "UI Team",
-                id: "second",
-                content: "Second tab content area"
-              },
-              {
-                label: "Backend Team",
-                id: "third",
-                content: "Third tab content area",
-              
-              },
-              {
-                label: "Testing Team",
-                id: "third",
-                content: "Third tab content area",
-              
-              },
-              {
-                label: "Devops Team",
-                id: "third",
-                content: "Third tab content area",
-              
-              }
-            ]}
-          />
+            )
+          }))}
+        />
 
-          <Box textAlign="right">
-            <Button variant="primary" iconName="add-plus" onClick={handleConfirm}>Create Project</Button>
-            {activeStepIndex >= 1 && (
-              <Button variant="link" onClick={() => setActiveStepIndex(activeStepIndex-1)} style={{ marginLeft: '1rem' }}>
-                Back
-              </Button>
-            )}
-          
-          </Box>
+        
         </SpaceBetween>
       ),
     },
   ];
 
   return (
-    <ContentLayout headerVariant="high-contrast" header={<Header variant="h3">Create Project</Header>}
+    <ContentLayout headerVariant="high-contrast" header={<Header variant="h3"
+    actions={
+      <Box textAlign="right">
+         {activeStepIndex >= 2 && (
+        <Button variant="link" onClick={() => setActiveStepIndex(activeStepIndex-1)} style={{ marginLeft: '1rem' }}>
+          Back
+        </Button>
+      )}
+    
+        {activeStepIndex >= 2 && (
+      <Button variant="primary" iconName="add-plus" onClick={handleConfirm}>Create Project</Button>
+        )}
+     
+    </Box>
+    }>Create Project</Header>}
     breadcrumbs={
       
       <BreadcrumbGroup

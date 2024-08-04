@@ -15,9 +15,11 @@ import {
   ButtonDropdown,
 } from '@cloudscape-design/components';
 
-const AllProjects = ({ specificProjectDetails }) => {
+const AllProjects = () => {
   const navigate = useNavigate();
-
+  const specificProjectDetails=()=>{
+    navigate("/app/project/123");
+  }
   const onCreateProject = () => {
     navigate("/app/project/create-project");
   };
@@ -65,7 +67,7 @@ const AllProjects = ({ specificProjectDetails }) => {
                 variant="primary"
                 onClick={onCreateProject}
               >
-                Create Your First Project
+                Start Your First Project
               </Button>
             </Box>
           </SpaceBetween> 
@@ -73,12 +75,12 @@ const AllProjects = ({ specificProjectDetails }) => {
       ) : (
         // Display when there are projects available
         <SpaceBetween direction='vertical' size='s'>
-          <Container>
+          <Container className='AllProject-Display'>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', gap: "8px" }}>
                 {/* Buttons to toggle between card and table views */}
                 <Button iconName='multiscreen' variant='primary' onClick={() => setView('cards')}></Button>
-                <Button variant='link' iconName='menu' onClick={() => setView('table')}></Button>
+                <Button variant='inline-icon' iconName='menu' onClick={() => setView('table')}></Button>
                 <div style={{ width: '60%' }}>
                   {/* TextFilter component for searching projects */}
                   <TextFilter
@@ -161,7 +163,7 @@ const AllProjects = ({ specificProjectDetails }) => {
                               id: "details",
                               content: item => (
                                 <div  onClick={specificProjectDetails} 
-                                style={{ color: item.status === 'Active' ? 'inherit' : '#414D5C', padding: "5px" }}>
+                                style={{ color:  '#414D5C', padding: "10px", cursor:"pointer" }}>
                                   <div style={{ display: "flex", justifyContent: "space-between", textAlign: "center" }}>
                                     <div style={{ display: "flex", gap: "2px", justifyItems: "center", textAlign: "center" }}>
                                       <div style={{
@@ -187,40 +189,42 @@ const AllProjects = ({ specificProjectDetails }) => {
                                   <p>{item.ProjectDescription}</p>
                                   <div style={{ display: 'flex', justifyContent: "space-between", marginTop:"10px" }}>
                                     <div style={{ display: 'flex', alignItems: 'center' }}>
-                                      {item.membersRequired.slice(0, 4).map((member, index) => (
-                                        <img
-                                          key={index}
-                                          src={member.imageUrl}
-                                          alt={`Member ${index}`}
-                                          style={{
+                                    {item.membersRequired.slice(0,2).map((memberGroup, groupIndex) =>
+                    memberGroup.members.slice(0, 4).map((member, memberIndex) => (
+                      <img
+                        key={`${groupIndex}-${memberIndex}`}
+                        src={member.imageUrl}
+                        alt={`Member ${memberIndex}`}
+                          style={{
                                             width: '20px',
                                             height: '20px',
                                             borderRadius: '50%',
-                                            marginLeft: index ? '-10px' : '0',
-                                            zIndex: 4 - index,
+                                            marginLeft: memberIndex ? '-10px' : '0',
+                                            zIndex: 4 - memberIndex,
                                           }}
-                                        />
-                                      ))}
-                                      {item.membersRequired.length > 4 && (
-                                        <div
-                                          style={{
-                                            width: '20px',
-                                            height: '20px',
-                                            borderRadius: '50%',
-                                            backgroundColor: '#ccc',
-                                            display: 'flex',
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                            marginLeft: '-10px',
-                                            zIndex: 0,
-                                            fontSize: '12px',
-                                            color: '#fff',
-                                          }}
-                                        >
-                                          +{item.membersRequired.length - 4}
-                                        </div>
-                                      )}
-                                    </div>
+                      />
+                    ))
+                  )}
+                  {item.membersRequired.length > 4 && (
+                    <div
+                    style={{
+                      width: '20px',
+                      height: '20px',
+                      borderRadius: '50%',
+                      backgroundColor: '#ccc',
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      marginLeft: '-10px',
+                      zIndex: 0,
+                      fontSize: '12px',
+                      color: '#fff',
+                    }}
+                    >
+                      +{item.membersRequired.length - 4}
+                    </div>
+                  )}
+                </div>
                                     <Button href="#" variant="inline-link">
                                       Use Cases: 10
                                     </Button>
@@ -247,6 +251,7 @@ const AllProjects = ({ specificProjectDetails }) => {
                 ) : (
                   // Display projects as a table
                   <Table
+                  className='Project-Table'
                     renderAriaLive={({ firstIndex, lastIndex, totalItemsCount }) =>
                       `Displaying items ${firstIndex} to ${lastIndex} of ${totalItemsCount}`
                     }
@@ -280,12 +285,7 @@ const AllProjects = ({ specificProjectDetails }) => {
                         cell: e => e.ProjectDescription,
                         sortingField: "description"
                       },
-                      {
-                        id: "status",
-                        header: "Status",
-                        cell: e => e.status,
-                        sortingField: "status"
-                      },
+                    
                       {
                         id: "teamSize",
                         header: "Team Size",

@@ -22,6 +22,7 @@ function App() {
      navigationWidth={230}
     headerSelector="#header"
  headerVariant="high-contrast"
+ contentType="dashboard"
     navigation={
       <Sidebar></Sidebar>
     }

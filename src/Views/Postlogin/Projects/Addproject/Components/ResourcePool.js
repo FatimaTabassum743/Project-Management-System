@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Button,
@@ -14,9 +14,9 @@ import {
 import del from "../../../../../assets/img/icons/Icon.png";
 import member from '../../../../../assets/img/profile-img.jpg';
 import suitcase from "../../../../../assets/img/Depth 6, Frame 0.png";
-import "../../../../../assets/styles/addproject.css";
+import "../../../../../assets/styles/cloudScapeCustom.css"
 
-const ResourcePool = ({ onSelectTeam, onMembersRequiredUpdate }) => {
+const ResourcePool = ({ onMembersRequiredUpdate }) => {
   const [teams, setTeams] = useState([
     { name: 'UI Team', members: 0 },
     { name: 'Frontend', members: 0 },
@@ -29,7 +29,7 @@ const ResourcePool = ({ onSelectTeam, onMembersRequiredUpdate }) => {
   const [newTeamName, setNewTeamName] = useState('');
   const [teamSearchQuery, setTeamSearchQuery] = useState('');
   const [resourceSearchQuery, setResourceSearchQuery] = useState('');
-  const [selectedItems, setSelectedItems] = useState([]);
+  const [selectedItems, setSelectedItems] = useState({});
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [teamToDelete, setTeamToDelete] = useState(null);
   const [membersRequired, setMembersRequired] = useState([]);
@@ -65,17 +65,10 @@ const ResourcePool = ({ onSelectTeam, onMembersRequiredUpdate }) => {
       setIsCreateModalOpen(false);
     }
   };
- 
+
   const handleDeleteTeam = () => {
     setTeams(teams.filter(team => team.name !== teamToDelete.name));
-    if (selectedTeam === teamToDelete.name) {
-      setSelectedTeam(null);
-      setSelectedItems([]); // Clear selected items if the deleted team is selected
-      setMembersRequired([]); // Clear selected members
-      if (onMembersRequiredUpdate) {
-        onMembersRequiredUpdate([]); // Notify parent of cleared members
-      }
-    }
+    setMembersRequired(membersRequired.filter(item => item.teamName !== teamToDelete.name));
     setIsDeleteModalOpen(false);
     setTeamToDelete(null);
   };
@@ -91,26 +84,35 @@ const ResourcePool = ({ onSelectTeam, onMembersRequiredUpdate }) => {
 
   const handleTeamSelection = (team) => {
     setSelectedTeam(team.name);
-
-    if (onSelectTeam) {
-      onSelectTeam({ team, resources: selectedItems });
-    }
+    // Set the selected items for the selected team
+    setSelectedItems(prev => ({
+      ...prev,
+      [team.name]: prev[team.name] || []
+    }));
   };
 
   const handleSelectionChange = ({ detail }) => {
     const selected = detail.selectedItems;
-    setSelectedItems(selected);
 
-    // Update MembersRequired with image URLs
-    const updatedMembers = selected.map(item => ({
-      ...item,
-      imageUrl: item.imageUrl // Ensure imageUrl is included
+    setSelectedItems(prev => ({
+      ...prev,
+      [selectedTeam]: selected
     }));
-    setMembersRequired(updatedMembers);
+
+    const updatedMembersRequired = [...membersRequired];
+    const teamIndex = updatedMembersRequired.findIndex(item => item.teamName === selectedTeam);
+
+    if (teamIndex !== -1) {
+      updatedMembersRequired[teamIndex].members = selected;
+    } else {
+      updatedMembersRequired.push({ teamName: selectedTeam, members: selected });
+    }
+
+    setMembersRequired(updatedMembersRequired);
 
     // Notify parent of updated members
     if (onMembersRequiredUpdate) {
-      onMembersRequiredUpdate(updatedMembers);
+      onMembersRequiredUpdate(updatedMembersRequired);
     }
 
     // Update team member count
@@ -126,20 +128,6 @@ const ResourcePool = ({ onSelectTeam, onMembersRequiredUpdate }) => {
     setTeamToDelete(team);
     setIsDeleteModalOpen(true);
   };
-
-  useEffect(() => {
-    if (selectedTeam) {
-      const team = teams.find(t => t.name === selectedTeam);
-      if (team) {
-        // Update the member count for the selected team
-        setTeams(teams.map(t =>
-          t.name === selectedTeam
-            ? { ...t, members: membersRequired.length }
-            : t
-        ));
-      }
-    }
-  }, [membersRequired, selectedTeam,teams]);
 
   return (
     <Container className='Resource-Container'>
@@ -177,8 +165,7 @@ const ResourcePool = ({ onSelectTeam, onMembersRequiredUpdate }) => {
                     <img src={suitcase} alt='suitcase icon' />
                     <div>
                       <p>{team.name}</p>
-                      {/* <small>{team.members} members</small> */}
-                      <small>0 members</small>
+                      <small>{team.members} members</small>
                     </div>
                   </div>
                   <div style={{ cursor: "pointer" }} onClick={() => openDeleteModal(team)}>
@@ -225,7 +212,7 @@ const ResourcePool = ({ onSelectTeam, onMembersRequiredUpdate }) => {
         <Container variant='borderless' className='members-container'>
           {selectedTeam ? (
             <SpaceBetween direction='vertical' size='s'>
-              <Box variant="p">Selected team: {selectedTeam} Total ({membersRequired.length}) members Required For this Project</Box>
+              <Box variant="h5">{selectedTeam} </Box>
               <TextFilter
                 filteringText={resourceSearchQuery}
                 onChange={e => setResourceSearchQuery(e.detail.filteringText)}
@@ -233,11 +220,7 @@ const ResourcePool = ({ onSelectTeam, onMembersRequiredUpdate }) => {
               />
               <Cards
                 onSelectionChange={handleSelectionChange}
-                selectedItems={selectedItems}
-                ariaLabels={{
-                  itemSelectionLabel: (e, i) => `select ${i.name}`,
-                  selectionGroupLabel: "Item selection"
-                }}
+                selectedItems={selectedItems[selectedTeam] || []}
                 cardDefinition={{
                   sections: [
                     {
@@ -245,7 +228,7 @@ const ResourcePool = ({ onSelectTeam, onMembersRequiredUpdate }) => {
                       content: item => (
                         <Box textAlign='center' display='block'>
                           <img
-                            style={{ width: "50px", height: "50px", borderRadius: "50%", textAlign: "center" }}
+                            style={{ width: "50px", height: "50px", borderRadius: "50%", textAlign: "center" , marginTop:"8px" }}
                             src={item.imageUrl || member}
                             alt="profile"
                           />
@@ -254,11 +237,11 @@ const ResourcePool = ({ onSelectTeam, onMembersRequiredUpdate }) => {
                     },
                     {
                       id: "name",
-                      content: item => <Box textAlign='center' variant='h3'>{item.name}</Box>
+                      content: item => <Box  textAlign='center' margin={{top:"xxs"}} variant='h3'>{item.name}</Box>
                     },
                     {
                       id: "description",
-                      content: item => <Box textAlign='center'>{item.description}</Box>
+                      content: item => <Box  textAlign='center' margin={{bottom:"xxs"}}>{item.description}</Box>
                     },
                   ]
                 }}
@@ -277,7 +260,7 @@ const ResourcePool = ({ onSelectTeam, onMembersRequiredUpdate }) => {
               />
             </SpaceBetween>
           ) : (
-            <Box variant="p">Please click on a team to see its resources.</Box>
+            <Box variant="h5">Please select a team to view its members.</Box>
           )}
         </Container>
       </Grid>

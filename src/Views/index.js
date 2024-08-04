@@ -7,6 +7,7 @@ import QuotationCreateFPS from "./Postlogin/Quatations/QuotationCreateFPS";
 import ProductDetails from "./Postlogin/FinishProductSpecification/ProductDetails";
 import QuatationsForm from "./Postlogin/Quatations/QutationForm";
 import Addproject from "./Postlogin/Projects/Addproject";
+import ProjectDetails from "./Postlogin/Projects/ProjectDetails";
 const Dashboards = lazy(() => import("./Postlogin/Dashboard"));
 const Quotations = lazy(() => import("./Postlogin/Quatations"));
 const FinishProductSpecification = lazy(() =>
@@ -40,6 +41,11 @@ const Views = () => {
             path={`${PREFIX_APP_PATH}/project/create-project`}
              element={<Addproject />}
           />
+           <Route
+  exact
+  path={`${PREFIX_APP_PATH}/project/:id`}
+  element={<ProjectDetails />}
+/>
           <Route
             exact
             path={`${PREFIX_APP_PATH}/dashboard`}
